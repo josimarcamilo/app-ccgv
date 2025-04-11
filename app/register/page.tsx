@@ -12,8 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 
-export default function Register() {
-  const [name, setName] = useState("")
+export default function Login() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -26,43 +25,25 @@ export default function Register() {
     setError("")
 
     try {
-      // 1. Registrar o usuário
-      const registerResponse = await fetch("https://api.orfed.com.br/register", {
+      const response = await fetch("https://api.orfed.com.br/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ email, password }),
       })
 
-      const registerData = await registerResponse.json()
+      const data = await response.json()
 
-      if (!registerResponse.ok) {
-        throw new Error(registerData.error || "Erro ao registrar usuário")
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao fazer login")
       }
 
-      // 2. Se o registro for bem-sucedido (201), fazer login automaticamente
-      if (registerResponse.status === 201) {
-        const loginResponse = await fetch("https://api.orfed.com.br/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
-        })
+      // Salvar o token no localStorage
+      localStorage.setItem("token", data.token)
 
-        const loginData = await loginResponse.json()
-
-        if (!loginResponse.ok) {
-          throw new Error(loginData.error || "Erro ao fazer login após registro")
-        }
-
-        // 3. Salvar o token JWT no localStorage
-        localStorage.setItem("token", loginData.token)
-
-        // 4. Redirecionar para a página inicial
-        router.push("/")
-      }
+      // Redirecionar para a página inicial
+      router.push("/")
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -74,8 +55,8 @@ export default function Register() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Registro</CardTitle>
-          <CardDescription className="text-center">Crie sua conta para acessar o sistema</CardDescription>
+          <CardTitle className="text-2xl text-center">Login</CardTitle>
+          <CardDescription className="text-center">Entre com suas credenciais para acessar o sistema</CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
@@ -86,17 +67,6 @@ export default function Register() {
           )}
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Nome</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Seu nome"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -119,16 +89,16 @@ export default function Register() {
                 />
               </div>
               <Button type="submit" disabled={loading}>
-                {loading ? "Registrando..." : "Registrar"}
+                {loading ? "Carregando..." : "Entrar"}
               </Button>
             </div>
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            Já tem uma conta?{" "}
-            <Link href="/login" className="text-primary font-medium hover:underline">
-              Faça login
+            Não tem uma conta?{" "}
+            <Link href="/register" className="text-primary font-medium hover:underline">
+              Registre-se
             </Link>
           </p>
         </CardFooter>
