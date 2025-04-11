@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { apiRequest, saveToken } from "@/lib/api"
 
 export default function Register() {
   const [name, setName] = useState("")
@@ -24,22 +25,27 @@ export default function Register() {
     setError(null)
 
     try {
-      const response = await fetch("https://api.orfed.com.br/register", {
+      // 1. Fazer a requisição de registro
+      await apiRequest("/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({ name, email, password }),
       })
 
-      const data = await response.json()
+      // 2. Se o registro for bem-sucedido, fazer login automaticamente
+      const loginResponse = await apiRequest("/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      })
 
-      if (!response.ok) {
-        throw new Error(data.message || "Erro ao registrar")
+      // 3. Salvar o token JWT retornado pela API
+      if (loginResponse.token) {
+        saveToken(loginResponse.token)
+
+        // 4. Redirecionar para a página inicial
+        router.push("/")
+      } else {
+        throw new Error("Token não recebido após login")
       }
-
-      // Redirecionar após registro bem-sucedido
-      router.push("/login")
     } catch (error: any) {
       setError(error.message || "Erro ao registrar")
     } finally {

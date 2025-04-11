@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { apiRequest, saveToken } from "@/lib/api"
 
 export default function Login() {
   const [email, setEmail] = useState("")
@@ -17,30 +18,26 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
-  // Modifique a função handleLogin para usar a URL base correta e o endpoint /login
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
 
     try {
-      const response = await fetch("https://api.orfed.com.br/login", {
+      const response = await apiRequest("/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({ email, password }),
       })
 
-      const data = await response.json()
+      // Salvar o token JWT
+      if (response.token) {
+        saveToken(response.token)
 
-      if (!response.ok) {
-        throw new Error(data.message || "Erro ao fazer login")
+        // Redirecionar para a página inicial
+        router.push("/")
+      } else {
+        throw new Error("Token não recebido")
       }
-
-      // Redirecionar após login bem-sucedido
-      router.push("/dashboard")
     } catch (error: any) {
       setError(error.message || "Erro ao fazer login")
     } finally {
