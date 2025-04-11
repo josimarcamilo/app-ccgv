@@ -9,62 +9,40 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle } from "lucide-react"
 
-export default function Register() {
-  const [name, setName] = useState("")
+export default function Login() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Modifique a função handleLogin para usar a URL base correta e o endpoint /login
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError("")
+    setError(null)
 
     try {
-      // 1. Registrar o usuário
-      const registerResponse = await fetch("https://api.orfed.com.br/register", {
+      const response = await fetch("https://api.orfed.com.br/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ email, password }),
       })
 
-      const registerData = await registerResponse.json()
+      const data = await response.json()
 
-      if (!registerResponse.ok) {
-        throw new Error(registerData.error || "Erro ao registrar usuário")
+      if (!response.ok) {
+        throw new Error(data.message || "Erro ao fazer login")
       }
 
-      // 2. Se o registro for bem-sucedido (201), fazer login automaticamente
-      if (registerResponse.status === 201) {
-        const loginResponse = await fetch("https://api.orfed.com.br/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
-        })
-
-        const loginData = await loginResponse.json()
-
-        if (!loginResponse.ok) {
-          throw new Error(loginData.error || "Erro ao fazer login após registro")
-        }
-
-        // 3. Salvar o token JWT no localStorage
-        localStorage.setItem("token", loginData.token)
-
-        // 4. Redirecionar para a página inicial
-        router.push("/")
-      }
-    } catch (err: any) {
-      setError(err.message)
+      // Redirecionar após login bem-sucedido
+      router.push("/dashboard")
+    } catch (error: any) {
+      setError(error.message || "Erro ao fazer login")
     } finally {
       setLoading(false)
     }
@@ -74,61 +52,43 @@ export default function Register() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Registro</CardTitle>
-          <CardDescription className="text-center">Crie sua conta para acessar o sistema</CardDescription>
+          <CardTitle className="text-2xl text-center">Login</CardTitle>
+          <CardDescription className="text-center">Entre com suas credenciais para acessar sua conta</CardDescription>
         </CardHeader>
         <CardContent>
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Nome</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Seu nome"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">Senha</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              <Button type="submit" disabled={loading}>
-                {loading ? "Registrando..." : "Registrar"}
-              </Button>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Senha</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            {error && <p className="text-sm text-red-500">{error}</p>}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Entrando..." : "Entrar"}
+            </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex justify-center">
-          <p className="text-sm text-muted-foreground">
-            Já tem uma conta?{" "}
-            <Link href="/login" className="text-primary font-medium hover:underline">
-              Faça login
+        <CardFooter>
+          <p className="text-sm text-center w-full">
+            Não tem uma conta?{" "}
+            <Link href="/register" className="text-blue-600 hover:underline">
+              Registre-se
             </Link>
           </p>
         </CardFooter>
