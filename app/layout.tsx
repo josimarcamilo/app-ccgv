@@ -1,16 +1,10 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
-
-const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Sistema CCGV",
-  description: "Centro de Controle Gerencial Vicentino",
-    generator: 'v0.dev'
+  title: "Orfed",
+  description: "Sistema de Gestão",
 }
 
 export default function RootLayout({
@@ -20,16 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-          {children}
-          <Toaster />
-        </ThemeProvider>
-      </body>
+      <body>{children}</body>
     </html>
   )
 }
-
-
-
-import './globals.css'
