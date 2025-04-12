@@ -34,7 +34,7 @@ export default function Login() {
         saveToken(response.token)
 
         // Redirecionar para a página inicial
-        router.push("/")
+        router.push("/dashboard")
       } else {
         throw new Error("Token não recebido")
       }

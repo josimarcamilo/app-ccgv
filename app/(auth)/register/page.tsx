@@ -42,7 +42,7 @@ export default function Register() {
         saveToken(loginResponse.token)
 
         // 4. Redirecionar para a página inicial
-        router.push("/")
+        router.push("/dashboard")
       } else {
         throw new Error("Token não recebido após login")
       }
